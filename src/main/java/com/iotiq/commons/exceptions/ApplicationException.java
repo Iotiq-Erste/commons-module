@@ -3,10 +3,8 @@ package com.iotiq.commons.exceptions;
 import lombok.Setter;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,7 +12,7 @@ import java.util.Objects;
 public abstract class ApplicationException extends RuntimeException implements MessageSourceResolvable {
     final HttpStatus status;
     final String prefix;
-//    final Codes codes = new Codes();
+    final Codes codes = new Codes();
     final transient Object[] arguments;
 
     protected ApplicationException(HttpStatus status, String prefix, List<String> messageParts, Object[] arguments) {
@@ -22,9 +20,9 @@ public abstract class ApplicationException extends RuntimeException implements M
         this.prefix = prefix;
         this.arguments = arguments;
 
-//        codes.add("exception");
-//        codes.add(prefix);
-//        codes.addAll(messageParts);
+        codes.add("exception");
+        codes.add(prefix);
+        codes.addAll(messageParts);
     }
 
     protected ApplicationException(HttpStatus status, String prefix, List<String> messageParts) {
@@ -33,29 +31,18 @@ public abstract class ApplicationException extends RuntimeException implements M
 
     @Nullable
     @Override
-    public Object[] getArguments() {
-        return Objects.requireNonNullElseGet(arguments, () -> new Object[]{});
-    }
-
-    public HttpStatus getStatus() {
-        return status;
+    public String[] getCodes() {
+        return codes.toStringArray();
     }
 
     @Nullable
     @Override
-    public String[] getCodes() {
-        List<String> codes = createCodes();
-        return codes.toArray(new String[0]);
+    public Object[] getArguments() {
+        return Objects.requireNonNullElseGet(arguments, () -> new Object[]{});
     }
 
-    @NonNull
-    private List<String> createCodes() {
-        LinkedList<String> codes = new LinkedList<>();
-
-        String builder = "exception." +
-                prefix;
-        codes.add(builder);
-
-        return codes;
+    @Override
+    public String getDefaultMessage() {
+        return codes.getLast();
     }
 }
