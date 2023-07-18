@@ -29,6 +29,10 @@ public abstract class ApplicationException extends RuntimeException implements M
         this(status, prefix, messageParts, new String[0]);
     }
 
+    public HttpStatus getStatus() {
+        return status;
+    }
+
     @Nullable
     @Override
     public String[] getCodes() {
