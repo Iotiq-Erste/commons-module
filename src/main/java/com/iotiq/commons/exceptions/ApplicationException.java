@@ -47,6 +47,6 @@ public abstract class ApplicationException extends RuntimeException implements M
 
     @Override
     public String getDefaultMessage() {
-        return codes.getLast();
+        return codes.getFirst();
     }
 }

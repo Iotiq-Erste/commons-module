@@ -21,7 +21,8 @@ public class Codes extends LinkedList<String> {
     @Override
     public boolean add(String s) {
         joiner.add(s);
-        return super.add(joiner.toString());
+        super.addFirst(joiner.toString());
+        return true;
     }
 
     @Override

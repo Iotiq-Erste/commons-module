@@ -30,7 +30,7 @@ class CodesTest {
 
         {
             codes.add("errorName");
-            assertThat(codes.toStringArray()).containsAll(List.of("exception", "exception.errorName"));
+            assertThat(codes.toStringArray()).containsAll(List.of("exception.errorName", "exception"));
         }
     }
 
@@ -41,7 +41,12 @@ class CodesTest {
             Exp exp = new Exp(HttpStatus.INTERNAL_SERVER_ERROR, "prefix", List.of("mp1", "mp2"));
             String[] codes = exp.getCodes();
 
-            assertThat(codes).containsAll(List.of("exception", "exception.prefix", "exception.prefix.mp1", "exception.prefix.mp1.mp2"));
+            assertThat(codes).containsAll(List.of(
+                    "exception.prefix.mp1.mp2",
+                    "exception.prefix.mp1",
+                    "exception.prefix",
+                    "exception"
+            ));
 
             assertThat(exp.getDefaultMessage()).isEqualTo("exception.prefix.mp1.mp2");
         }
@@ -50,7 +55,12 @@ class CodesTest {
             Exp exp = new Exp(HttpStatus.INTERNAL_SERVER_ERROR, "prefix", List.of("mp1", "mp2"), "arg1", "arg2");
             String[] codes = exp.getCodes();
 
-            assertThat(codes).containsAll(List.of("exception", "exception.prefix", "exception.prefix.mp1", "exception.prefix.mp1.mp2"));
+            assertThat(codes).containsAll(List.of(
+                    "exception.prefix.mp1.mp2",
+                    "exception.prefix.mp1",
+                    "exception.prefix",
+                    "exception"
+            ));
         }
     }
 }
