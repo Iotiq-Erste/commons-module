@@ -10,7 +10,6 @@ public class MessageResourceConfig {
     public ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource rs = new ResourceBundleMessageSource();
         rs.setBasename("i18n/messages");
-        rs.setUseCodeAsDefaultMessage(true);
         return rs;
     }
 }
