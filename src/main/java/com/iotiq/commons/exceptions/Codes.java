@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.lang.NonNull;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.StringJoiner;
 
@@ -17,13 +18,18 @@ public class Codes extends LinkedList<String> {
         return toArray(new String[0]);
     }
 
-    public String[] createCodes() {
-        joiner = new StringJoiner(".");
-        for (String messagePart : this) {
-            joiner.add(messagePart);
-            add(joiner.toString());
-        }
+    @Override
+    public boolean add(String s) {
+        joiner.add(s);
+        super.addFirst(joiner.toString());
+        return true;
+    }
 
-        return toStringArray();
+    @Override
+    public boolean addAll(Collection<? extends String> c) {
+        for (String s : c) {
+            add(s);
+        }
+        return true;
     }
 }

@@ -29,15 +29,24 @@ public abstract class ApplicationException extends RuntimeException implements M
         this(status, prefix, messageParts, new String[0]);
     }
 
+    public HttpStatus getStatus() {
+        return status;
+    }
+
     @Nullable
     @Override
     public String[] getCodes() {
-        return codes.createCodes();
+        return codes.toStringArray();
     }
 
     @Nullable
     @Override
     public Object[] getArguments() {
         return Objects.requireNonNullElseGet(arguments, () -> new Object[]{});
+    }
+
+    @Override
+    public String getDefaultMessage() {
+        return codes.getFirst();
     }
 }
