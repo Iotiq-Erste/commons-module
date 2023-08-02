@@ -1,4 +1,4 @@
-package com.iotiq.commons.config;
+package com.iotiq.commons.message.response;
 
 
 import lombok.AllArgsConstructor;
