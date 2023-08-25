@@ -20,7 +20,7 @@ pipeline {
             }
             steps {
                 echo 'Run parent project build/deployment job'
-                build job: env.PARENT_PROJECT_DEPLOYMENT_JOB
+                build job: env.PARENT_PROJECT_DEPLOYMENT_JOB, wait: false
             }
         }
     }
