@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
@@ -118,11 +119,16 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     }
 
     private String getMessage(FieldError fieldError) {
-        if (fieldError.getDefaultMessage() != null) {
-            String defaultMessageResolved = messageSource.getMessage(fieldError.getDefaultMessage(),
-                    fieldError.getArguments(), getLocale());
-            if (!defaultMessageResolved.equals(fieldError.getDefaultMessage())) {
-                return defaultMessageResolved;
+        String defaultMessage = fieldError.getDefaultMessage();
+
+        if (defaultMessage != null) {
+            try {
+                String defaultMessageResolved = messageSource.getMessage(defaultMessage, fieldError.getArguments(), getLocale());
+                if (!defaultMessageResolved.equals(defaultMessage)) {
+                    return defaultMessageResolved;
+                }
+            } catch (NoSuchMessageException e) {
+                return defaultMessage;
             }
         }
         return messageSource.getMessage(fieldError, getLocale());
