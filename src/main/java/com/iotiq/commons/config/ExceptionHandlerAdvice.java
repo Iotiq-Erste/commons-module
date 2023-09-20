@@ -3,11 +3,11 @@ package com.iotiq.commons.config;
 import com.iotiq.commons.exceptions.ApplicationException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
+import com.iotiq.commons.util.MessageUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.*;
 import org.springframework.lang.NonNull;
@@ -23,9 +23,8 @@ import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.iotiq.commons.util.HttpUtil.getSeries;
+import static com.iotiq.commons.util.MessageUtil.getSeries;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 @ControllerAdvice
@@ -33,6 +32,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     private final ResourceBundleMessageSource messageSource;
+    private final MessageUtil messageUtil;
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<Object> handleApplicationException(ApplicationException exception, @NonNull WebRequest request) {
@@ -49,9 +49,9 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request
+            @NotNull MethodArgumentNotValidException exception, @NotNull HttpHeaders headers,
+            @NotNull HttpStatusCode status, @NotNull WebRequest request
     ) {
-
         List<ValidationError> validationErrors = getValidationErrors(exception);
         ProblemDetail problemDetail = createProblemDetail(exception, status, "validation failed",
                 "validation", exception.getDetailMessageArguments(), request);
@@ -113,25 +113,8 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
                 .map(fieldError -> ValidationError.builder()
                         .field(fieldError.getField())
                         .rejectedValue(fieldError.getRejectedValue())
-                        .message(getMessage(fieldError))
+                        .message(messageUtil.getMessage(fieldError))
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
-
-    private String getMessage(FieldError fieldError) {
-        String defaultMessage = fieldError.getDefaultMessage();
-
-        if (defaultMessage != null) {
-            try {
-                String defaultMessageResolved = messageSource.getMessage(defaultMessage, fieldError.getArguments(), getLocale());
-                if (!defaultMessageResolved.equals(defaultMessage)) {
-                    return defaultMessageResolved;
-                }
-            } catch (NoSuchMessageException e) {
-                return defaultMessage;
-            }
-        }
-        return messageSource.getMessage(fieldError, getLocale());
-    }
-
 }
