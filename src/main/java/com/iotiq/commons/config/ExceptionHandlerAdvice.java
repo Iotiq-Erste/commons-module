@@ -4,7 +4,6 @@ import com.iotiq.commons.exceptions.ApplicationException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
@@ -59,15 +57,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(exception, problemDetail, headers, status, request);
     }
 
-    @ExceptionHandler(Throwable.class)
-    ProblemDetail onThrowable(Throwable error, HttpServletRequest request) {
-        logger.error(ExceptionUtils.getStackTrace(error));
-        ServerHttpObservationFilter.findObservationContext(request)
-                .ifPresent(context -> context.setError(error));
-
-        return createProblemDetail(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @Override
     protected @NotNull ProblemDetail createProblemDetail(
             @NotNull Exception exception, @NotNull HttpStatusCode status, @NotNull String defaultDetail,
@@ -75,23 +64,9 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     ) {
         HttpStatus.Series series = getSeries(status);
         ProblemDetail problemDetail = super.createProblemDetail(exception, status, defaultDetail, detailMessageCode, detailMessageArguments, request);
-        addProblemDetailProperties(problemDetail, series, exception);
+        problemDetail.setProperty("series", series);
+        problemDetail.setProperty("rootCause", ExceptionUtils.getRootCause(exception).toString());
         return problemDetail;
-    }
-
-    private ProblemDetail createProblemDetail(Throwable error, HttpStatus status) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(status);
-        problemDetail.setTitle(status.getReasonPhrase());
-        problemDetail.setDetail(error.toString());
-        addProblemDetailProperties(problemDetail, status.series(), error);
-//        problemDetail.setProperty("traceparent", getTraceParent());
-
-        return problemDetail;
-    }
-
-    private static void addProblemDetailProperties(ProblemDetail problemDetail, HttpStatus.Series status, Throwable error) {
-        problemDetail.setProperty("series", status);
-        problemDetail.setProperty("rootCause", ExceptionUtils.getRootCause(error).toString());
     }
 
     void logException(WebRequest request, Exception ex) {
