@@ -49,7 +49,7 @@ public class NullHandlerUtil {
     ) {
         R key = keyGetter.get();
         if (key != null) {
-            T apply = objectGetter.apply(key).orElseThrow(() -> new EntityNotFoundException(entityName));
+            T apply = objectGetter.apply(key).orElseThrow(() -> new EntityNotFoundException(entityName.getClass()));
             setter.accept(apply);
         } else { // set null if key is null
             setter.accept(null);

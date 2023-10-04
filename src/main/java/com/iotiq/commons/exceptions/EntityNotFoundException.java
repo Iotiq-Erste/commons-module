@@ -6,7 +6,7 @@ import java.util.List;
 
 public class EntityNotFoundException extends ApplicationException {
 
-    public EntityNotFoundException(String entityName, Object... args) {
-        super(HttpStatus.NOT_FOUND, "entityNotFound", List.of(entityName), args);
+    public EntityNotFoundException(Class<?> entityClass, Object... args) {
+        super(HttpStatus.NOT_FOUND, "entityNotFound", List.of(entityClass.getSimpleName()), args);
     }
 }
