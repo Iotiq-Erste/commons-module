@@ -20,11 +20,8 @@ import java.time.Instant;
  */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-@ToString(callSuper = true)
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(callSuper = true)
-@RequiredArgsConstructor
 public abstract class BaseAbstractAuditingEntity<T extends Serializable> extends AbstractPersistable<T> {
 
     @CreatedBy
