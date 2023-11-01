@@ -5,6 +5,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +28,10 @@ public abstract class ApplicationException extends RuntimeException implements M
 
     protected ApplicationException(HttpStatus status, String prefix, List<String> messageParts) {
         this(status, prefix, messageParts, new String[0]);
+    }
+
+    protected ApplicationException(HttpStatus status, String prefix, Object[] args) {
+        this(status, prefix, Collections.emptyList(), args);
     }
 
     public HttpStatus getStatus() {
