@@ -2,7 +2,9 @@ package com.iotiq.commons.config;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -12,6 +14,7 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,15 +25,28 @@ import org.springframework.core.env.Environment;
 @Configuration
 public class OpenTelemetryConfig {
 
-    @Value("${opentelemetry.loggingendpoint}")
+    @Value("${opentelemetry.loggingendpoint:http://localhost:4317}")
     private String loggingEndpoint;
 
     @Bean
-    OpenTelemetry openTelemetry(SdkLoggerProvider sdkLoggerProvider, SdkTracerProvider sdkTracerProvider, ContextPropagators contextPropagators) {
+    OpenTelemetry openTelemetry(SdkLoggerProvider sdkLoggerProvider) {
+
+        Resource resource = Resource.getDefault()
+                .merge(Resource.create(Attributes.of(
+                        ResourceAttributes.SERVICE_NAME, "Culturati Main Backend"
+                )));
+
+        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(BatchSpanProcessor.builder(OtlpHttpSpanExporter.builder()
+                        .setEndpoint("http://localhost:4318/v1/traces")
+                        .build()).build())
+                .setResource(resource)
+                .build();
+
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setLoggerProvider(sdkLoggerProvider)
                 .setTracerProvider(sdkTracerProvider)
-                .setPropagators(contextPropagators)
+                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .build();
         OpenTelemetryAppender.install(openTelemetrySdk);
         return openTelemetrySdk;
