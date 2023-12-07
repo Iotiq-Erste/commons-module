@@ -28,6 +28,9 @@ public class OpenTelemetryConfig {
     @Value("${opentelemetry.loggingendpoint:http://localhost:4317}")
     private String loggingEndpoint;
 
+    @Value("${management.otlp.tracing.endpoint:http://localhost:4318/v1/traces}")
+    private String tracingEndpoint;
+
     @Bean
     OpenTelemetry openTelemetry(SdkLoggerProvider sdkLoggerProvider) {
 
@@ -38,7 +41,7 @@ public class OpenTelemetryConfig {
 
         SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(OtlpHttpSpanExporter.builder()
-                        .setEndpoint("http://localhost:4318/v1/traces")
+                        .setEndpoint(tracingEndpoint)
                         .build()).build())
                 .setResource(resource)
                 .build();
