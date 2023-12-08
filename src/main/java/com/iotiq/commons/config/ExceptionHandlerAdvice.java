@@ -37,7 +37,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         logException(request, exception);
 
         String defaultDetail = messageSource.getMessage(exception, getLocale());
-        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, (String) null);
+        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null);
         HttpStatusCode status = exception.getStatus();
         Object[] arguments = exception.getArguments();
 

@@ -1,5 +1,6 @@
 package com.iotiq.commons.exceptions;
 
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 @Setter
 public abstract class ApplicationException extends RuntimeException implements MessageSourceResolvable {
     final HttpStatus status;
@@ -34,10 +36,6 @@ public abstract class ApplicationException extends RuntimeException implements M
         this(status, prefix, Collections.emptyList(), args);
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
-
     @Nullable
     @Override
     public String[] getCodes() {
@@ -53,5 +51,10 @@ public abstract class ApplicationException extends RuntimeException implements M
     @Override
     public String getDefaultMessage() {
         return codes.getFirst();
+    }
+
+    @Override
+    public String getMessage() {
+        return getDefaultMessage();
     }
 }
