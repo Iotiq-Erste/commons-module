@@ -25,7 +25,7 @@ public class MessageUtil {
         return resolved != null ? resolved.series() : null;
     }
 
-    public String getMessage(FieldError fieldError) {
+    public String getErrorMessage(FieldError fieldError) {
         // default message is the code we write in the validation annotations' parenthesis. We want to use that code to
         // resolve the exception message here. But if there is no custom code given we don't want the message to default
         // to the validation annotation's message. Instead, the field error should be resolved using the method
