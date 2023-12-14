@@ -88,7 +88,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
                 .map(fieldError -> ValidationError.builder()
                         .field(fieldError.getField())
                         .rejectedValue(fieldError.getRejectedValue())
-                        .message(messageUtil.getMessage(fieldError))
+                        .message(messageUtil.getErrorMessage(fieldError))
                         .build())
                 .toList();
     }
