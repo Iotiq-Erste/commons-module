@@ -35,7 +35,7 @@ class MessageUtilTest {
         when(fieldError.getDefaultMessage()).thenReturn(null);
         when(messageSource.getMessage(same(fieldError), any(Locale.class))).thenReturn(RESOLVED_MESSAGE);
 
-        String message = messageUtil.getMessage(fieldError);
+        String message = messageUtil.getErrorMessage(fieldError);
 
         assertThat(message).isEqualTo(RESOLVED_MESSAGE);
     }
@@ -46,7 +46,7 @@ class MessageUtilTest {
         when(fieldError.getDefaultMessage()).thenReturn(null);
         when(messageSource.getMessage(any(), any())).thenThrow(NoSuchMessageException.class);
 
-        String message = messageUtil.getMessage(fieldError);
+        String message = messageUtil.getErrorMessage(fieldError);
 
         assertThat(message).isNull();
     }
@@ -58,7 +58,7 @@ class MessageUtilTest {
         when(messageSource.getMessage(eq(DEFAULT_MESSAGE), any(), any(Locale.class)))
                 .thenThrow(NoSuchMessageException.class);
 
-        String message = messageUtil.getMessage(fieldError);
+        String message = messageUtil.getErrorMessage(fieldError);
 
         assertThat(message).isEqualTo(DEFAULT_MESSAGE);
     }
@@ -71,7 +71,7 @@ class MessageUtilTest {
                 .thenReturn(DEFAULT_MESSAGE);
         when(messageSource.getMessage(same(fieldError), any(Locale.class))).thenReturn(RESOLVED_MESSAGE);
 
-        String message = messageUtil.getMessage(fieldError);
+        String message = messageUtil.getErrorMessage(fieldError);
 
         assertThat(message).isEqualTo(RESOLVED_MESSAGE);
     }
@@ -83,7 +83,7 @@ class MessageUtilTest {
         when(messageSource.getMessage(eq(DEFAULT_MESSAGE), any(), any(Locale.class)))
                 .thenReturn(RESOLVED_MESSAGE);
 
-        String message = messageUtil.getMessage(fieldError);
+        String message = messageUtil.getErrorMessage(fieldError);
 
         assertThat(message).isEqualTo(RESOLVED_MESSAGE);
     }

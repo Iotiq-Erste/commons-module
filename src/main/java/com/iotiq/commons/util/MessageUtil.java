@@ -1,8 +1,6 @@
 package com.iotiq.commons.util;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 @RequiredArgsConstructor
 public class MessageUtil {
 
-    private final Logger log = LoggerFactory.getLogger(MessageUtil.class);
     private final ResourceBundleMessageSource messageSource;
 
     public static HttpStatus.Series getSeries(HttpStatusCode status) {
@@ -25,7 +22,7 @@ public class MessageUtil {
         return resolved != null ? resolved.series() : null;
     }
 
-    public String getMessage(FieldError fieldError) {
+    public String getErrorMessage(FieldError fieldError) {
         // default message is the code we write in the validation annotations' parenthesis. We want to use that code to
         // resolve the exception message here. But if there is no custom code given we don't want the message to default
         // to the validation annotation's message. Instead, the field error should be resolved using the method
@@ -50,5 +47,9 @@ public class MessageUtil {
         } catch (NoSuchMessageException e) {
             return defaultMessage;
         }
+    }
+
+    public String getMessage(String messageKey, Object[] arguments) {
+        return messageSource.getMessage(messageKey, arguments, getLocale());
     }
 }
