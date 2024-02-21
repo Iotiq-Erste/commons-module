@@ -9,7 +9,8 @@ public class MessageResourceConfig {
     @Bean
     public ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource rs = new ResourceBundleMessageSource();
-        rs.setBasename("i18n/messages");
+        rs.setBasenames("i18n/messages");
+        rs.setDefaultEncoding("UTF-8");
         return rs;
     }
 }
