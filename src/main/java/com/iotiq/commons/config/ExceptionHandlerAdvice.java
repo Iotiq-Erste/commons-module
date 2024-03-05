@@ -45,6 +45,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
+
     @ExceptionHandler(UnprocessableEntityException.class)
     public ResponseEntity<Object> handleUnprocessableEntityException(UnprocessableEntityException exception, @NonNull WebRequest request) {
         logException(request, exception);
@@ -55,9 +56,10 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         Object[] arguments = exception.getArguments();
 
         ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
-        problemDetail.setProperty("violations",exception.getViolations());
+        problemDetail.setProperty("violations", exception.getViolations());
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             @NotNull MethodArgumentNotValidException exception, @NotNull HttpHeaders headers,
