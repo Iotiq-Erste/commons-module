@@ -46,7 +46,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
     @ExceptionHandler(UnprocessableEntityException.class)
-    public ResponseEntity<Object> handleApplicationException(UnprocessableEntityException exception, @NonNull WebRequest request) {
+    public ResponseEntity<Object> handleUnprocessableEntityException(UnprocessableEntityException exception, @NonNull WebRequest request) {
         logException(request, exception);
 
         String defaultDetail = messageSource.getMessage(exception, getLocale());
