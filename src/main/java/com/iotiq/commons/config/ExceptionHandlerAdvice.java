@@ -1,7 +1,7 @@
 package com.iotiq.commons.config;
 
 import com.iotiq.commons.exceptions.ApplicationException;
-import com.iotiq.commons.exceptions.GeneralValidationException;
+import com.iotiq.commons.exceptions.ApplicationValidationException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
@@ -36,28 +36,29 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<Object> handleApplicationException(ApplicationException exception, @NonNull WebRequest request) {
         logException(request, exception);
-
-        String defaultDetail = messageSource.getMessage(exception, getLocale());
-        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null);
         HttpStatusCode status = exception.getStatus();
-        Object[] arguments = exception.getArguments();
 
-        ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
+        ProblemDetail problemDetail = getProblemDetail(exception, request, status);
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler(GeneralValidationException.class)
-    public ResponseEntity<Object> handleGeneralValidationException(GeneralValidationException exception, @NonNull WebRequest request) {
+    @ExceptionHandler(ApplicationValidationException.class)
+    public ResponseEntity<Object> handleApplicationValidationException(ApplicationValidationException exception, @NonNull WebRequest request) {
         logException(request, exception);
-
-        String defaultDetail = messageSource.getMessage(exception, getLocale());
-        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null);
         HttpStatusCode status = exception.getStatus();
-        Object[] arguments = exception.getArguments();
 
-        ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
+        ProblemDetail problemDetail = getProblemDetail(exception, request, status);
         problemDetail.setProperty("violations", exception.getViolations());
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
+    }
+
+    @NotNull
+    private ProblemDetail getProblemDetail(ApplicationException exception, WebRequest request, HttpStatusCode status) {
+        String defaultDetail = messageSource.getMessage(exception, getLocale());
+        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null);
+        Object[] arguments = exception.getArguments();
+
+        return this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
     }
 
     @Override
