@@ -1,7 +1,7 @@
 package com.iotiq.commons.config;
 
 import com.iotiq.commons.exceptions.ApplicationException;
-import com.iotiq.commons.exceptions.UnprocessableEntityException;
+import com.iotiq.commons.exceptions.GeneralValidationException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
@@ -46,8 +46,8 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler(UnprocessableEntityException.class)
-    public ResponseEntity<Object> handleUnprocessableEntityException(UnprocessableEntityException exception, @NonNull WebRequest request) {
+    @ExceptionHandler(GeneralValidationException.class)
+    public ResponseEntity<Object> handleGeneralValidationException(GeneralValidationException exception, @NonNull WebRequest request) {
         logException(request, exception);
 
         String defaultDetail = messageSource.getMessage(exception, getLocale());
