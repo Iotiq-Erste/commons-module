@@ -49,15 +49,15 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({ ConstraintViolationException.class })
-    public ResponseEntity<Object> handleConstraintViolation(final ConstraintViolationException ex, final WebRequest request) {
-        logger.info(ex.getClass().getName());
+    public ResponseEntity<Object> handleConstraintViolation(final ConstraintViolationException exception, final WebRequest request) {
+        logException(request, exception);
         //
         final List<String> errors = new ArrayList<String>();
-        for (final ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+        for (final ConstraintViolation<?> violation : exception.getConstraintViolations()) {
             errors.add(violation.getRootBeanClass().getName() + " " + violation.getPropertyPath() + ": " + violation.getMessage());
         }
 
-        return new ResponseEntity<>("Validation failed: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Validation failed: " + exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @Override
