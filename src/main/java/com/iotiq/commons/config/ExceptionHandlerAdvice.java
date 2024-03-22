@@ -4,13 +4,16 @@ import com.iotiq.commons.exceptions.ApplicationException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -20,9 +23,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.iotiq.commons.util.MessageUtil.getSeries;
@@ -48,18 +51,6 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler({ ConstraintViolationException.class })
-    public ResponseEntity<Object> handleConstraintViolation(final ConstraintViolationException exception, final WebRequest request) {
-        logException(request, exception);
-        //
-        final List<String> errors = new ArrayList<String>();
-        for (final ConstraintViolation<?> violation : exception.getConstraintViolations()) {
-            errors.add(violation.getRootBeanClass().getName() + " " + violation.getPropertyPath() + ": " + violation.getMessage());
-        }
-
-        return new ResponseEntity<>("Validation failed: " + exception.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             @NotNull MethodArgumentNotValidException exception, @NotNull HttpHeaders headers,
@@ -68,6 +59,19 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         List<ValidationError> validationErrors = getValidationErrors(exception);
         ProblemDetail problemDetail = createProblemDetail(exception, status, "validation failed",
                 "validation", exception.getDetailMessageArguments(), request);
+        problemDetail.setProperty("validation", validationErrors);
+        return handleExceptionInternal(exception, problemDetail, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(
+            @NotNull HandlerMethodValidationException exception, @NotNull HttpHeaders headers,
+            @NotNull HttpStatusCode status, @NotNull WebRequest request
+    ) {
+        List<ValidationError> validationErrors = getValidationErrors(exception.getAllErrors());
+        ProblemDetail problemDetail = this.createProblemDetail(exception, status, "validation failed",
+                ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null),
+                exception.getDetailMessageArguments(), request);
         problemDetail.setProperty("validation", validationErrors);
         return handleExceptionInternal(exception, problemDetail, headers, status, request);
     }
@@ -104,6 +108,15 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
                         .field(fieldError.getField())
                         .rejectedValue(fieldError.getRejectedValue())
                         .message(messageUtil.getErrorMessage(fieldError))
+                        .build())
+                .toList();
+    }
+
+    @NotNull
+    private List<ValidationError> getValidationErrors(List<? extends MessageSourceResolvable> allErrors) {
+        return allErrors.stream()
+                .map(err -> ValidationError.builder()
+                        .message(messageUtil.getErrorMessage(err))
                         .build())
                 .toList();
     }
