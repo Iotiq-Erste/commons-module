@@ -1,12 +1,14 @@
 package com.iotiq.commons.util;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.FieldError;
 
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
@@ -17,12 +19,13 @@ public class MessageUtil {
 
     private final ResourceBundleMessageSource messageSource;
 
+    @Nullable
     public static HttpStatus.Series getSeries(HttpStatusCode status) {
         HttpStatus resolved = HttpStatus.resolve(status.value());
         return resolved != null ? resolved.series() : null;
     }
 
-    public String getErrorMessage(FieldError fieldError) {
+    public String getErrorMessage(@NotNull MessageSourceResolvable fieldError) {
         // default message is the code we write in the validation annotations' parenthesis. We want to use that code to
         // resolve the exception message here. But if there is no custom code given we don't want the message to default
         // to the validation annotation's message. Instead, the field error should be resolved using the method
