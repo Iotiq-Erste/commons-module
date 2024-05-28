@@ -16,13 +16,17 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.ResourceAttributes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+@Slf4j
 @Configuration
+@ConditionalOnProperty(name = "opentelemetry.enabled", havingValue = "true", matchIfMissing = true)
 public class OpenTelemetryConfig {
 
     @Value("${opentelemetry.loggingendpoint:http://localhost:4317}")
@@ -34,6 +38,7 @@ public class OpenTelemetryConfig {
     @Bean
     OpenTelemetry openTelemetry(SdkLoggerProvider sdkLoggerProvider) {
 
+        log.info("OpenTelemetry is active");
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(Attributes.of(
                         ResourceAttributes.SERVICE_NAME, "Culturati Main Backend"
