@@ -36,6 +36,10 @@ public abstract class ApplicationException extends RuntimeException implements M
         this(status, prefix, Collections.emptyList(), args);
     }
 
+    protected ApplicationException(HttpStatus httpStatus, String prefix) {
+        this(httpStatus, prefix, Collections.emptyList(), new String[0]);
+    }
+
     @Nullable
     @Override
     public String[] getCodes() {
