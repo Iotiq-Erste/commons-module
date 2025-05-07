@@ -40,11 +40,14 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<Object> handleApplicationException(ApplicationException exception, @NonNull WebRequest request) {
-        logException(request, exception);
+        HttpStatusCode status = exception.getStatus();
+
+        if (!HttpStatus.BAD_GATEWAY.equals(status)) {
+            logException(request, exception);
+        }
 
         String defaultDetail = messageSource.getMessage(exception, getLocale());
         String messageCode = ErrorResponse.getDefaultDetailMessageCode(ApplicationException.class, null);
-        HttpStatusCode status = exception.getStatus();
         Object[] arguments = exception.getArguments();
 
         ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
