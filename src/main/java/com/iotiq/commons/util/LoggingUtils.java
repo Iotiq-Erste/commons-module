@@ -22,6 +22,10 @@ public class LoggingUtils {
         log.error(getTracedString(var1), var2);
     }
 
+    public static void error(String var1) {
+        log.error(getTracedString(var1));
+    }
+
     private static String getTracedString(String str) {
         String traceId = getOrCreateRequestId();
         return '-' + traceId + "- " + str;

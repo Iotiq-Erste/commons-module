@@ -1,6 +1,7 @@
 package com.iotiq.commons.config;
 
 import com.iotiq.commons.exceptions.ApplicationException;
+import com.iotiq.commons.exceptions.ExternalServiceException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
@@ -49,6 +50,32 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
         ProblemDetail problemDetail = this.createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<Object> handleExternalServiceException(ExternalServiceException exception, @NonNull WebRequest request) {
+        logBasic(request, exception, exception.getDetailMessage());
+
+        HttpStatusCode status = exception.getStatus();
+        String defaultDetail = messageSource.getMessage(exception, getLocale());
+        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ExternalServiceException.class, null);
+        Object[] arguments = exception.getArguments();
+
+        ProblemDetail problemDetail = createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
+        return handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
+    }
+
+    void logBasic(WebRequest request, Exception ex, String detailMessage) {
+        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+        final String message = String.format(
+                "handled %s during %s to %s: %s: %s",
+                ex.getClass().getSimpleName(),
+                servletWebRequest.getHttpMethod(),
+                servletWebRequest.getRequest().getServletPath(),
+                ex.getMessage(),
+                detailMessage
+        );
+        LoggingUtils.error(message);
     }
 
     @Override
