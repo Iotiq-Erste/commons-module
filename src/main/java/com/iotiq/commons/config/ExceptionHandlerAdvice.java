@@ -1,7 +1,7 @@
 package com.iotiq.commons.config;
 
 import com.iotiq.commons.exceptions.ApplicationException;
-import com.iotiq.commons.exceptions.ExternalServiceException;
+import com.iotiq.commons.exceptions.NoTraceException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
@@ -52,20 +52,20 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler(ExternalServiceException.class)
-    public ResponseEntity<Object> handleExternalServiceException(ExternalServiceException exception, @NonNull WebRequest request) {
-        logBasic(request, exception, exception.getDetailMessage());
+    @ExceptionHandler(NoTraceException.class)
+    public ResponseEntity<Object> handleNoTraceException(NoTraceException exception, @NonNull WebRequest request) {
+        logBasic(request, exception, exception.getLogHint());
 
         HttpStatusCode status = exception.getStatus();
         String defaultDetail = messageSource.getMessage(exception, getLocale());
-        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ExternalServiceException.class, null);
+        String messageCode = ErrorResponse.getDefaultDetailMessageCode(NoTraceException.class, null);
         Object[] arguments = exception.getArguments();
 
         ProblemDetail problemDetail = createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
         return handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    void logBasic(WebRequest request, Exception ex, String detailMessage) {
+    void logBasic(WebRequest request, Exception ex, String logHint) {
         ServletWebRequest servletWebRequest = (ServletWebRequest) request;
         final String message = String.format(
                 "handled %s during %s to %s: %s: %s",
@@ -73,7 +73,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
                 servletWebRequest.getHttpMethod(),
                 servletWebRequest.getRequest().getServletPath(),
                 ex.getMessage(),
-                detailMessage
+                logHint
         );
         LoggingUtils.error(message);
     }
