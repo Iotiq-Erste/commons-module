@@ -54,7 +54,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoTraceException.class)
     public ResponseEntity<Object> handleNoTraceException(NoTraceException exception, @NonNull WebRequest request) {
-        logBasic(request, exception, exception.getLogNote());
+        logBasic(request, exception, exception.getLogHint());
 
         HttpStatusCode status = exception.getStatus();
         String defaultDetail = messageSource.getMessage(exception, getLocale());
@@ -65,7 +65,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    void logBasic(WebRequest request, Exception ex, String detailMessage) {
+    void logBasic(WebRequest request, Exception ex, String logHint) {
         ServletWebRequest servletWebRequest = (ServletWebRequest) request;
         final String message = String.format(
                 "handled %s during %s to %s: %s: %s",
@@ -73,7 +73,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
                 servletWebRequest.getHttpMethod(),
                 servletWebRequest.getRequest().getServletPath(),
                 ex.getMessage(),
-                detailMessage
+                logHint
         );
         LoggingUtils.error(message);
     }
