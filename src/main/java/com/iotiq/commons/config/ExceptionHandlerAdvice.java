@@ -1,7 +1,7 @@
 package com.iotiq.commons.config;
 
 import com.iotiq.commons.exceptions.ApplicationException;
-import com.iotiq.commons.exceptions.ExternalServiceException;
+import com.iotiq.commons.exceptions.NoTraceException;
 import com.iotiq.commons.message.response.ValidationError;
 import com.iotiq.commons.util.LoggingUtils;
 import com.iotiq.commons.util.MessageUtil;
@@ -52,13 +52,13 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(exception, problemDetail, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler(ExternalServiceException.class)
-    public ResponseEntity<Object> handleExternalServiceException(ExternalServiceException exception, @NonNull WebRequest request) {
-        logBasic(request, exception, exception.getDetailMessage());
+    @ExceptionHandler(NoTraceException.class)
+    public ResponseEntity<Object> handleNoTraceException(NoTraceException exception, @NonNull WebRequest request) {
+        logBasic(request, exception, exception.getLogNote());
 
         HttpStatusCode status = exception.getStatus();
         String defaultDetail = messageSource.getMessage(exception, getLocale());
-        String messageCode = ErrorResponse.getDefaultDetailMessageCode(ExternalServiceException.class, null);
+        String messageCode = ErrorResponse.getDefaultDetailMessageCode(NoTraceException.class, null);
         Object[] arguments = exception.getArguments();
 
         ProblemDetail problemDetail = createProblemDetail(exception, status, defaultDetail, messageCode, arguments, request);
